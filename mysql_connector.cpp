@@ -4,12 +4,20 @@ MySQLConnector::MySQLConnector()
 {
     connection = mysql_init(NULL);
     connect(host.c_str(), user.c_str(), password.c_str(), database.c_str());
+    if (checkTable("users") == false)
+    {
+        createUsersTable();
+    }
 }
 
 MySQLConnector::MySQLConnector(const char *host, const char *user, const char *password, const char *database)
 {
     connection = mysql_init(NULL);
     connect(host, user, password, database);
+    if (checkTable("users") == false)
+    {
+        createUsersTable();
+    }
 }
 
 MySQLConnector::~MySQLConnector()
@@ -47,13 +55,22 @@ bool MySQLConnector::executeQuery(const char *query)
         std::cerr << "Error: " << mysql_error(connection) << std::endl;
         return false;
     }
+
+    MYSQL_RES *result = mysql_store_result(connection);
+    if (result == NULL)
+    {
+        return false;
+    }
+    mysql_free_result(result);
     return true;
 }
 
 // user account functions
 bool MySQLConnector::registerUser(const std::string &username, const std::string &password, const std::string &email)
 {
-    std::string query = "INSERT INTO users (username, password, email) VALUES ('" + inputSanitizer(username) + "', '" + inputSanitizer(password) + "', '" + inputSanitizer(email) + "')";
+    std::string query = "INSERT INTO users (username, password_hash, email) VALUES ('" + inputSanitizer(username) + "', '" +
+                        inputSanitizer(password) + "', '" +
+                        inputSanitizer(email) + "')";
     return executeQuery(query.c_str());
 }
 
@@ -65,7 +82,7 @@ bool MySQLConnector::checkUsername(const std::string &username)
 
 bool MySQLConnector::authenticateUser(const std::string &username, const std::string &password)
 {
-    std::string query = "SELECT * FROM users WHERE username = '" + inputSanitizer(username) + "' AND password = '" + inputSanitizer(password) + "'";
+    std::string query = "SELECT * FROM users WHERE username = '" + inputSanitizer(username) + "' AND password_hash = '" + inputSanitizer(password) + "'";
     return executeQuery(query.c_str());
 }
 
@@ -84,70 +101,89 @@ std::string MySQLConnector::generateSessionToken(const std::string &username)
 }
 
 // database setup functions
-bool MySQLConnector::createDatabase(const char *database)
+bool MySQLConnector::checkTable(const char *table)
 {
-    if (database == NULL)
-    {
-        std::cerr << "Error: "
-                  << "Database name cannot be NULL" << std::endl;
-        return false;
-    }
+    std::string query = "SHOW TABLES LIKE '" + inputSanitizer(table) + "'";
+    
+    return executeQuery(query.c_str());
+}
 
-    if (database == "")
+bool MySQLConnector::createTable(const char *table_name, std::vector<std::pair<std::string, std::string>> columns)
+{
+    std::string query = "CREATE TABLE IF NOT EXISTS " + inputSanitizer(table_name) + " (";
+    for (int i = 0; i < columns.size(); i++)
     {
-        std::cerr << "Error: "
-                  << "Database name cannot be empty" << std::endl;
-        return false;
+        query += columns[i].first + " " + columns[i].second;
+        if (i != columns.size() - 1)
+        {
+            query += ", ";
+        }
     }
-
-    if (database == "mysql" || database == "information_schema" || database == "performance_schema" || database == "sys")
-    {
-        std::cerr << "Error: "
-                  << "Database name cannot be a system database" << std::endl;
-        return false;
-    }
-
-    // The query to create a new database, with the given name
-    std::string query = "CREATE DATABASE " + inputSanitizer(database) + ";";
+    query += ");";
     if (executeQuery(query.c_str()) == false)
     {
         std::cerr << "Error: "
-                  << "Database creation failed" << std::endl;
+                  << "Table creation failed" << std::endl;
         return false;
     }
+    std::cout << "Table created successfully" << std::endl;
     return true;
 }
 
-bool MySQLConnector::checkDatabase(const char *database)
+bool MySQLConnector::createUsersTable()
 {
-    if (database == NULL)
+    std::vector<std::pair<std::string, std::string>> columns = {
+        {"id", "INT AUTO_INCREMENT PRIMARY KEY"},
+        {"username", "VARCHAR(100) NOT NULL UNIQUE"},
+        {"password_hash", "VARCHAR(100) NOT NULL UNIQUE"},
+        {"email", "VARCHAR(100) NOT NULL UNIQUE"},
+        {"session_token", "VARCHAR(100) NOT NULL UNIQUE"},
+        {"role", "ENUM('admin', 'user') DEFAULT 'user'"},
+        {"status", "ENUM('active', 'inactive') DEFAULT 'active'"},
+        {"created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
+        {"updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"},
+        {"deleted_at", "TIMESTAMP"}};
+    return createTable("users", columns);
+}
+
+// debug database functions
+void MySQLConnector::printTable(const char *table)
+{
+    std::string query = "SELECT * FROM " + inputSanitizer(table);
+    if (executeQuery(query.c_str()))
+    {
+        MYSQL_RES *result = mysql_store_result(connection);
+        int num_fields = mysql_num_fields(result);
+        MYSQL_ROW row;
+        while ((row = mysql_fetch_row(result)))
+        {
+            for (int i = 0; i < num_fields; i++)
+            {
+                std::cout << row[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+        mysql_free_result(result);
+    }
+    else
     {
         std::cerr << "Error: "
-                  << "Database name cannot be NULL" << std::endl;
-        return false;
+                  << "Table print failed" << std::endl;
     }
+}
 
-    if (database == "")
-    {
-        std::cerr << "Error: "
-                  << "Database name cannot be empty" << std::endl;
-        return false;
-    }
 
-    if (database == "mysql" || database == "information_schema" || database == "performance_schema" || database == "sys")
-    {
-        std::cerr << "Error: "
-                  << "Database name cannot be a system database" << std::endl;
-        return false;
-    }
+void MySQLConnector::printUsersTable()
+{
+    printTable("users");
+}
 
-    // The query to check if a database exists
-    std::string query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + inputSanitizer(database) + "';";
+void MySQLConnector::fillUsersTable()
+{
+    std::string query = "LOAD DATA LOCAL INFILE '~/Downloads/MOCK_DATA.csv' INTO TABLE users FIELDS TERMINATED BY ',' TERMINATED BY '\n' IGNORE 1 ROWS";
     if (executeQuery(query.c_str()) == false)
     {
         std::cerr << "Error: "
-                  << "Database Doesn't exist, Creating Database..." << std::endl;
-        return false;
+                  << "Table fill failed" << std::endl;
     }
-    return true;
 }

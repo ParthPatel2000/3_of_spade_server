@@ -1,9 +1,9 @@
 #ifndef MYSQL_CONNECTOR_H
 #define MYSQL_CONNECTOR_H
 
-// #include <mysql/mysql.h> // Include the mysql.h header file from AWS
-#include "E:\Programs\mysql\include\mysql.h"
+#include <mysql/mysql.h> // Include the mysql.h header file from AWS
 #include <string>
+#include <vector>
 #include <iostream>
 
 class MySQLConnector
@@ -34,9 +34,14 @@ public:
     std::string generateSessionToken(const std::string &username);                                         // generate a session token for a user
 
     // database setup functions
-    bool checkDatabase(const char *database);    // check if a database existsx 
-    bool createDatabase(const char *database); // create a new database
-    bool createTable(const char *table);       // create a new table
+    bool createTable(const char *table_name, std::vector<std::pair<std::string, std::string>> columns); // create all the tables
+    bool checkTable(const char *table);                                                                 // check if a table exists
+    bool createUsersTable();                                                                            // create the users table
+
+    // debug database functions
+    void printTable(const char *table); // print the table
+    void printUsersTable();             // print the users table
+    void fillUsersTable();              // fill the users table with dummy data, from a csv file
 };
 
 #endif // MYSQL_CONNECTOR_H

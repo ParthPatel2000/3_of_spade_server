@@ -20,9 +20,10 @@ from a deck which has the bidder's cards excluded and this is how the partners a
 int main()
 {
 
-
     MySQLConnector *connector = new MySQLConnector();
-    connector->executeQuery("SELECT * FROM users");
+    // connector->createUsersTable();
+    connector->fillUsersTable();
+    connector->printUsersTable();
     // Game *game = new Game(8);
 
     // // Printing the players cards
