@@ -34,3 +34,6 @@ vendor/
 # Miscellaneous
 .DS_Store
 Thumbs.db
+
+# dummy data files
+*.csv

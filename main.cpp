@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "user_account.h"
 #include "mysql_connector.h"
 
 using namespace std;
@@ -20,10 +21,10 @@ from a deck which has the bidder's cards excluded and this is how the partners a
 int main()
 {
 
-    MySQLConnector *connector = new MySQLConnector();
-    // connector->createUsersTable();
-    connector->fillUsersTable();
-    connector->printUsersTable();
+    UserAccount *connector = new UserAccount();
+
+    // connector->fillUsersTable();
+    connector->authenticateUser("10", "2");
     // Game *game = new Game(8);
 
     // // Printing the players cards

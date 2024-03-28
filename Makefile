@@ -11,7 +11,7 @@ INCLUDES := -I/usr/include/mysql
 LIBDIRS := -L/usr/lib/mysql
 
 # Libraries
-LIBS := -lmysqlclient
+LIBS := -lmysqlclient -lssl -lcrypto
 
 # Source files
 SRCS := $(wildcard *.cpp)
