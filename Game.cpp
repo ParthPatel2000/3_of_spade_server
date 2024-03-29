@@ -94,6 +94,48 @@ Game::Game(int lobby_size)
     distribute_cards();
 }
 
+void Game::fill_lobby(int lobby_size)
+{
+    for (int i = 0; i < lobby_size; i++)
+    {
+        string username = "player" + to_string(i);
+        string auth_token = "auth_token" + to_string(i);
+        set_player_username_auth_map(username, auth_token, i);
+    }
+    bind_players_to_game();
+}
+
+/**
+ * @brief Binds each player to the player structs and initializes the player struct,
+ *       with the player id, username, and auth token.
+ *
+ * @param username
+ * @param auth_token
+ * @param player_id
+ */
+void Game::bindPlayerToStruct(string username, string auth_token, int player_id)
+{
+    player_username_auth_map[player_id].insert({username, auth_token});
+    players[player_id].player_id = player_id;
+    players[player_id].username = username;
+    players[player_id].auth_token = auth_token;
+}
+
+
+void Game::bind_players_to_game()
+{
+    int player_id = 0;
+    for (auto &i : player_username_auth_map)
+    {
+        for (auto &j : i)
+        {
+            bindPlayerToStruct(j.first, j.second, player_id);
+            player_id++;
+        }
+    }
+    return;
+}
+
 /**
  * @brief This function shuffles the deck n number of times
  *        where n is the shuffle_count

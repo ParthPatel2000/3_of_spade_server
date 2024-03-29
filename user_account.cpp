@@ -76,9 +76,11 @@ bool UserAccount::authenticateUser(const std::string &username, const std::strin
     return result;
 }
 
-std::string UserAccount::generateGameID(const std::string &username)
+std::string UserAccount::updateGameID(const std::string &username, const std::string &gameID)
 {
+    // for now it's random, but later we will save the current game id, so incase a user disconnects we can reconnect them to their respective game, if it's available.
     std::string gameID = generateRandomToken(username, game_id_length);
+    
     std::string query = "UPDATE users SET game_id = '" + database_connector->inputSanitizer(gameID) + "' WHERE username = '" + database_connector->inputSanitizer(username) + "'";
     if (database_connector->executeQuery(query.c_str()))
     {
@@ -90,10 +92,10 @@ std::string UserAccount::generateGameID(const std::string &username)
     }
 }
 
-std::string UserAccount::generateAuthToken(const std::string &username)
+std::string UserAccount::updateAuthToken(const std::string &username)
 {
     std::string authToken = generateRandomToken(username, auth_token_length);
-    std::string query = "UPDATE users SET auth_token = '" + database_connector->inputSanitizer(authToken) + "' WHERE username = '" + database_connector->inputSanitizer(username) + "'";
+    std::string query = "UPDATE users SET auth_token = '" + database_connector->inputSanitizer(authToken) +"', updated_at=CURRENT_TIMESTAMP WHERE username = '" + database_connector->inputSanitizer(username) + "'";
     if (database_connector->executeQuery(query.c_str()))
     {
         return authToken;
@@ -147,25 +149,13 @@ void UserAccount::createUsersTable()
         {"password_hash", "VARCHAR(100) NOT NULL UNIQUE"},
         {"email", "VARCHAR(100) NOT NULL UNIQUE"},
         {"auth_token", "VARCHAR(100) NOT NULL UNIQUE"},
+        {"game_id", "VARCHAR(100)"},
         {"role", "ENUM('admin', 'user') DEFAULT 'user'"},
         {"status", "ENUM('active', 'inactive') DEFAULT 'active'"},
         {"created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
-        {"updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"},
+        {"updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
         {"deleted_at", "TIMESTAMP"}};
     database_connector->createTable("users", columns);
-    return;
-}
-
-void UserAccount::createGamesTable()
-{
-    std::vector<std::pair<std::string, std::string>> columns = {
-        {"id", "INT AUTO_INCREMENT PRIMARY KEY"},
-        {"user_id", "INT NOT NULL"},
-        {"Game_id", "VARCHAR(100)"},
-        {"created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},
-        {"updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"},
-        {"deleted_at", "TIMESTAMP"}};
-    database_connector->createTable("Games", columns);
     return;
 }
 
@@ -173,30 +163,6 @@ void UserAccount::createGamesTable()
 void UserAccount::fillUsersTable()
 {
     std::string csv_file = "MOCK_DATA.csv";
-    std::ifstream file(csv_file);
-    if (!file.is_open())
-    {
-        std::cerr << "Error: "
-                  << "File open failed" << std::endl;
-        return;
-    }
-
-    std::string line;
-    std::getline(file, line); // Skip the first line (header)
-    while (std::getline(file, line))
-    {
-        std::stringstream ss(line);
-        std::string username, password, email;
-        std::getline(ss, username, ',');
-        std::getline(ss, password, ',');
-        std::getline(ss, email, ',');
-        registerUser(username, password, email);
-    }
-}
-
-void UserAccount::fillGamesTable()
-{
-    std::string csv_file = "game_id.csv";
     std::ifstream file(csv_file);
     if (!file.is_open())
     {

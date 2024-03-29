@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <random>
 #include <ctime>
+#include <unordered_map>
 
 using namespace std;
 
@@ -15,25 +16,29 @@ class Game
 public:
     struct card
     {
-        // int id;    // starts from 0, Range can be 0-51: Single deck, 0-103: Double Deck, 0-155: Triple deck.
         int value; // range 1-13  1- Ace, 2-10, 11- Jack, 12- Queen, 13- King.
         int color; // Color of the card 1- Sapdes, 2- Clubs, 3- Hearts, 4- Diamonds.
-        card(int value, int color) :  value(value), color(color) {}
+        card(int value, int color) : value(value), color(color) {}
     };
 
     struct player
     {
         int player_id;        // this will start with 0
-        int player_session_id; // this will come from the main function, based on the player who is playing.
+        string auth_token;    // this will come from the main function, based on the player who is playing.
+        string username;      // this will come from the main function, based on the player who is playing.
         vector<card *> cards; // holds a vector of cards that will be presorted.
         int team;             // the team of the player 1 or 2, 2 is default, so we can just assign 1 to the players who are in team 1.
-        int scored;           // this can be used in future to keep track of the score of individual players and declaet mvp.
+        int scored;           // this can be used in future to keep track of the score of individual players and declare mvp.
         int current_input;    // index of the selection from player cards, for easier popping and use.
         player() : player_id(0), team(2), scored(0), current_input(0) {}
     };
 
     // Variables
 private:
+    unordered_map<string, int>
+        player_map[8]; // This will be helpful to know which player is playing with which id
+                       // and in case of reconnection we can use this to get the player id.
+
     player *players;             // refernece to the players array that will be initialized by the constructor.
     vector<card *> deck;         // reference to the deck that will be initialized by the constructor.
     int lobby_size = 4;          // here lobby size is 4 but it is to make the code scalable i've left this one as a global constant
@@ -56,7 +61,12 @@ public:
     // important game functions
     Game(int lobby_size);
     ~Game();
-    // bool card_compare(const card& , const card &);
+    void fill_lobby(int lobby_size); // fill the player_username_auth_map with the players in the lobby
+
+    void bind_players_to_game(); // this will bind the player to the game and set the auth token and username
+    void bindPlayerToStruct(string username, string auth_token, int player_id);
+    void set_player_map(string username, int player_id);
+
     void sorting_the_cards(vector<card *>);
     void shufflecards();
     void deck_gen();

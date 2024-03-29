@@ -24,6 +24,7 @@ int main()
     UserAccount *connector = new UserAccount();
 
     // connector->fillUsersTable();
+    connector->updateAuthToken("nhaskey0");
     connector->authenticateUser("10", "2");
     // Game *game = new Game(8);
 
