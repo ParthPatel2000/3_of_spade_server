@@ -55,12 +55,12 @@ bool card_compare(const Game::card *c1, const Game::card *c2)
     return c1->value < c2->value;
 }
 
-Game::Game(int lobby_size)
+Game::Game(int lobby_size, string gameID)
 {
+    this->gameID = gameID; // set the game id
     this->lobby_size = lobby_size;
-    players = new player[lobby_size];
     deck_size = 0; // 52 for 4 player, 102 for 6 and 152 for 8 respectively
-
+    players = new player[lobby_size];
     // minimum target for 4 players is 150, for 6 players( 2 decks) is 300 and for 8 players(3 decks) is 450
     switch (lobby_size)
     {
@@ -94,20 +94,9 @@ Game::Game(int lobby_size)
     distribute_cards();
 }
 
-void Game::fill_lobby(int lobby_size)
-{
-    for (int i = 0; i < lobby_size; i++)
-    {
-        string username = "player" + to_string(i);
-        string auth_token = "auth_token" + to_string(i);
-        set_player_username_auth_map(username, auth_token, i);
-    }
-    bind_players_to_game();
-}
-
 /**
- * @brief Binds each player to the player structs and initializes the player struct,
- *       with the player id, username, and auth token.
+ * @brief bind the player to the struct and set the auth token and username,
+ *        this is useful when the player is reconnected to the game, or we need to validate their inputs.
  *
  * @param username
  * @param auth_token
@@ -115,25 +104,20 @@ void Game::fill_lobby(int lobby_size)
  */
 void Game::bindPlayerToStruct(string username, string auth_token, int player_id)
 {
-    player_username_auth_map[player_id].insert({username, auth_token});
-    players[player_id].player_id = player_id;
     players[player_id].username = username;
     players[player_id].auth_token = auth_token;
 }
 
-
-void Game::bind_players_to_game()
+/**
+ * @brief add a hashmap entry with the username as the key and the player id as the value,
+ *          so we can easily get the player id from the username.
+ *
+ * @param username
+ * @param player_id
+ */
+void Game::set_player_map(string username, int player_id)
 {
-    int player_id = 0;
-    for (auto &i : player_username_auth_map)
-    {
-        for (auto &j : i)
-        {
-            bindPlayerToStruct(j.first, j.second, player_id);
-            player_id++;
-        }
-    }
-    return;
+    username_playerID_map.insert(make_pair(username, player_id));
 }
 
 /**

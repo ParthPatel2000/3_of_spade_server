@@ -23,21 +23,37 @@ public:
 
     struct player
     {
-        int player_id;        // this will start with 0
-        string auth_token;    // this will come from the main function, based on the player who is playing.
-        string username;      // this will come from the main function, based on the player who is playing.
+        int player_id;     // this will start with 0
+        string ip_address; // this will be used to send the data to the player
+        string auth_token; // this will come from the main function, based on the player who is playing.
+        string username;   // this will come from the main function, based on the player who is playing.
+        
         vector<card *> cards; // holds a vector of cards that will be presorted.
         int team;             // the team of the player 1 or 2, 2 is default, so we can just assign 1 to the players who are in team 1.
         int scored;           // this can be used in future to keep track of the score of individual players and declare mvp.
         int current_input;    // index of the selection from player cards, for easier popping and use.
-        player() : player_id(0), team(2), scored(0), current_input(0) {}
+
+        // constructor for the player
+
+        player() : player_id(0), team(2), scored(0), current_input(0) {} // default constructor
+        player(int player_id, string ip_address, string auth_token, string username)
+        {
+            this->player_id = player_id;
+            this->username = username;
+            this->auth_token = auth_token;
+            this->ip_address = ip_address;
+            team = 2;
+            scored = 0;
+            current_input = 0;
+        }
     };
 
     // Variables
 private:
+    string gameID; // this will be used to identify the game as a unique entity and all the player objects will have this gameID.
     unordered_map<string, int>
-        player_map[8]; // This will be helpful to know which player is playing with which id
-                       // and in case of reconnection we can use this to get the player id.
+        username_playerID_map; // This will be helpful to know which player is playing with which id
+                               // and in case of reconnection we can use this to get the player id.
 
     player *players;             // refernece to the players array that will be initialized by the constructor.
     vector<card *> deck;         // reference to the deck that will be initialized by the constructor.
@@ -59,14 +75,15 @@ private:
     // Functions
 public:
     // important game functions
-    Game(int lobby_size);
+    Game(int lobby_size, string gameID); // constructor
     ~Game();
-    void fill_lobby(int lobby_size); // fill the player_username_auth_map with the players in the lobby
 
-    void bind_players_to_game(); // this will bind the player to the game and set the auth token and username
-    void bindPlayerToStruct(string username, string auth_token, int player_id);
-    void set_player_map(string username, int player_id);
+    // multiplayer functions
+    // fill the player_username_auth_map with the players in the lobby from the server code
+    void bindPlayerToStruct(string username, string auth_token, int player_id); // this will bind the player to a struct and set the auth token and username
+    void set_player_map(string username, int player_ID);                        // this will set the player map with the username(key) and the auth token and ip address
 
+    // game functions
     void sorting_the_cards(vector<card *>);
     void shufflecards();
     void deck_gen();
@@ -83,7 +100,7 @@ public:
     int player_has_color(int, int);
     void game_reset();
 
-    // api functions
+    // apis
     void get_player_cards(int player_id);
 
     // debugging functions
