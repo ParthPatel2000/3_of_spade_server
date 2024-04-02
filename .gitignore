@@ -16,16 +16,16 @@ build/
 bin/
 
 # IDE and editor files
-.vscode/
-.idea/
-.vs/
-*.suo
-*.user
-*.sln
-*.suo
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+# .vscode/
+# .idea/
+# .vs/
+# *.suo
+# *.user
+# *.sln
+# *.suo
+# *.vcxproj
+# *.vcxproj.filters
+# *.vcxproj.user
 
 # Dependency directories
 lib/
