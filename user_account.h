@@ -4,12 +4,13 @@
 #include "mysql_connector.h"
 #include <iostream>
 #include <string>
+#include <boost/asio.hpp>
 
 class UserAccount
 {
 private:
-    std::string host = "localhost";
-    std::string user = "root";
+    std::string host = "192.168.0.100";
+    std::string user = "debian";
     std::string password = "8238";
     std::string database = "user_accounts";
     int port = 3306;
@@ -34,9 +35,11 @@ public:
     void createUsersTable(); // create the users table
     void createGamesTable(); // create the Games table
 
+    //api functions
+    bool user_login(); // login a user
+
     // debug functions
     void fillUsersTable(); // fill the users table with dummy data
-    void fillGamesTable(); // fill the Games table with dummy data
 };
 
 #endif

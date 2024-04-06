@@ -3,14 +3,17 @@
 MySQLConnector::MySQLConnector()
 {
     connection = mysql_init(NULL);
-    connect(host.c_str(), user.c_str(), password.c_str(), database.c_str());
+    connect();
 }
 
-MySQLConnector::MySQLConnector(const char *host, const char *user, const char *password, const char *database)
+MySQLConnector::MySQLConnector(std::string host, std::string user, std::string password, std::string database)
 {
+    this->host = host;
+    this->user = user;
+    this->password = password;
+    this->database = database;
     connection = mysql_init(NULL);
-    connect(host, user, password, database);
-    
+    connect();
 }
 
 MySQLConnector::~MySQLConnector()
@@ -19,9 +22,9 @@ MySQLConnector::~MySQLConnector()
 }
 
 // basic utility functions
-bool MySQLConnector::connect(const char *host, const char *user, const char *password, const char *database)
+bool MySQLConnector::connect()
 {
-    if (mysql_real_connect(connection, host, user, password, database, 0, NULL, 0) == NULL)
+    if (mysql_real_connect(connection, host.c_str(), user.c_str(), password.c_str(), database.c_str(), 0, NULL, 0) == NULL)
     {
         std::cerr << "Error: " << mysql_error(connection) << std::endl;
         return false;
@@ -68,7 +71,6 @@ void MySQLConnector::freeResult(MYSQL_RES *result)
 {
     mysql_free_result(result);
 }
-
 
 // database setup functions
 bool MySQLConnector::checkTable(const char *table)
@@ -128,4 +130,3 @@ bool MySQLConnector::createTable(const char *table_name, std::vector<std::pair<s
     std::cout << "Table created successfully" << std::endl;
     return true;
 }
-

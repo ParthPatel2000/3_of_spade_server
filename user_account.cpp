@@ -79,12 +79,12 @@ bool UserAccount::authenticateUser(const std::string &username, const std::strin
 std::string UserAccount::updateGameID(const std::string &username, const std::string &gameID)
 {
     // for now it's random, but later we will save the current game id, so incase a user disconnects we can reconnect them to their respective game, if it's available.
-    std::string gameID = generateRandomToken(username, game_id_length);
+    std::string newgameID = generateRandomToken(username, game_id_length);
     
-    std::string query = "UPDATE users SET game_id = '" + database_connector->inputSanitizer(gameID) + "' WHERE username = '" + database_connector->inputSanitizer(username) + "'";
+    std::string query = "UPDATE users SET game_id = '" + database_connector->inputSanitizer(newgameID) + "' WHERE username = '" + database_connector->inputSanitizer(username) + "'";
     if (database_connector->executeQuery(query.c_str()))
     {
-        return gameID;
+        return newgameID;
     }
     else
     {
@@ -140,6 +140,15 @@ std::string UserAccount::getGameIDfromUsername(const std::string &username)
         return "";
     }
 }
+
+//apis
+
+bool UserAccount::user_login()
+{
+    //boost.asio login api
+    
+}
+
 //
 void UserAccount::createUsersTable()
 {
@@ -149,7 +158,7 @@ void UserAccount::createUsersTable()
         {"password_hash", "VARCHAR(100) NOT NULL UNIQUE"},
         {"email", "VARCHAR(100) NOT NULL UNIQUE"},
         {"auth_token", "VARCHAR(100) NOT NULL UNIQUE"},
-        {"game_id", "VARCHAR(100)"},
+        {"game_id", "VARCHAR(100)"},        //name of the game the user is currently playing
         {"role", "ENUM('admin', 'user') DEFAULT 'user'"},
         {"status", "ENUM('active', 'inactive') DEFAULT 'active'"},
         {"created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"},

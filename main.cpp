@@ -23,9 +23,10 @@ int main()
 
     UserAccount *connector = new UserAccount();
 
+    // connector->createUsersTable();
     // connector->fillUsersTable();
-    connector->updateAuthToken("nhaskey0");
-    connector->authenticateUser("10", "2");
+    connector->updateAuthToken("");
+    connector->authenticateUser("1", "2");
     // Game *game = new Game(8);
 
     // // Printing the players cards

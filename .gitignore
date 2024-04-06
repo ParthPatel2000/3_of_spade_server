@@ -14,6 +14,8 @@
 # Build directories
 build/
 bin/
+objects/
+testing_folder/
 
 # IDE and editor files
 # .vscode/
