@@ -190,6 +190,7 @@ void Game::deck_adjuster_for_lobby()
             if (removed < 2 && deck[i]->value == 2 && deck[i]->color == 1)
             {
                 deck.erase(deck.begin() + i);
+                removed += 1; // increment the removed counter
             }
         }
         deck_size = 102;
@@ -204,6 +205,7 @@ void Game::deck_adjuster_for_lobby()
             if (deck[i]->value == 2)
             {
                 deck.erase(deck.begin() + i);
+                removed += 1; // increment the removed counter
                 if (removed == 4)
                 {
                     break;

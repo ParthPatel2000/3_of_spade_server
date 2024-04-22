@@ -84,7 +84,6 @@ public:
     void set_player_map(string username, int player_ID);                        // this will set the player map with the username(key) and the auth token and ip address
 
     // game functions
-    void sorting_the_cards(vector<card *>);
     void shufflecards();
     void deck_gen();
     void deck_adjuster_for_lobby();

@@ -25,19 +25,20 @@ int main()
 
     // connector->createUsersTable();
     // connector->fillUsersTable();
-    connector->updateAuthToken("");
-    connector->authenticateUser("1", "2");
-    // Game *game = new Game(8);
+    // connector->updateAuthToken("");
+    // connector->authenticateUser("1", "2");
+    Game *game = new Game(6, "abc");
 
+    game->print_deck();
     // // Printing the players cards
-    // game->print_player_objects(0);
-    // game->print_player_objects(1);
-    // game->print_player_objects(2);
-    // game->print_player_objects(3);
-    // game->print_player_objects(4);
-    // game->print_player_objects(5);
-    // game->print_player_objects(6);
-    // game->print_player_objects(7);
+    game->print_player_objects(0);
+    game->print_player_objects(1);
+    game->print_player_objects(2);
+    game->print_player_objects(3);
+    game->print_player_objects(4);
+    game->print_player_objects(5);
+    game->print_player_objects(6);
+    game->print_player_objects(7);
 
     // game->print_deck();
 
