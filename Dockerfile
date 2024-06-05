@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     gnupg \
     debconf-utils\
+    libboost-all-dev \
+    libssl-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Preconfigure the MySQL APT repository package to run non-interactively

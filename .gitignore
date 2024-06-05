@@ -39,3 +39,6 @@ Thumbs.db
 
 # dummy data files
 *.csv
+
+# builds 
+server
